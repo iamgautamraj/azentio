@@ -32,6 +32,6 @@
 
 ## Top 3 Weakest Areas & Hypotheses
 
-1. **Pattern: atm_cashout_burst (Recall=0.8611)** — Initial small probe transactions within a burst have low amounts before velocity counters build up.
-2. **Pattern: foreign_usage (Recall=0.9778)** — Overlaps with genuine high-value shoppers or travelers, requiring a higher threshold to respect daily review capacity.
-3. **Channel: ATM (PR-AUC=0.9211)** — Fewer behavioral signals (e.g. null device_id on POS/ATM) reduce separability compared to ECOM.
+1. **Pattern: atm_cashout_burst (Recall=0.8611)** — 5 of 36 missed; missed rows have median txn_count_1h=0, median amount INR 10,000, median amt_to_median_ratio=2.94 (low velocity or amounts that overlap genuine behaviour, e.g. early burst steps).
+2. **Pattern: foreign_usage (Recall=0.9778)** — 1 of 45 missed; missed rows have median txn_count_1h=0, median amount INR 14,266, median amt_to_median_ratio=8.07 (low velocity or amounts that overlap genuine behaviour, e.g. early burst steps).
+3. **Channel: ATM (PR-AUC=0.9211)** — Only 36 fraud cases in 3797 ATM transactions, so PR-AUC is a high-variance estimate. ATM has a single MCC (6011) and no device_id, so only amount and velocity separate fraud; burst amounts (10k-20k) overlap genuine 10k withdrawals.

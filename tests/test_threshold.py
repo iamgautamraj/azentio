@@ -1,13 +1,22 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 import numpy as np
+import pandas as pd
 from fastapi.testclient import TestClient
 
 from needle.api import create_app
 from needle.generator import generate_transactions, save_transactions
 from needle.model import train_models
-from needle.threshold import CostConfig, compute_expected_cost, select_validation_threshold
+from needle.threshold import (
+    CostConfig,
+    compute_expected_cost,
+    run_threshold_selection,
+    select_validation_threshold,
+)
+
+COSTS_PATH = Path(__file__).resolve().parents[1] / "config" / "costs.yaml"
 
 
 def test_exact_rupee_cost_math() -> None:
@@ -96,3 +105,21 @@ def test_high_risk_burst_triggers_review_and_stores_alert(tmp_path) -> None:
         assert last_resp is not None
         assert last_resp["decision"] == "REVIEW"
         assert app.state.store.get_alert("CASHOUT_1") is not None
+
+def test_chosen_threshold_unchanged_when_test_window_labels_flipped(tmp_path) -> None:
+    df = generate_transactions(seed=21, n_cards=150, n_days=30, target_txns=3000)
+    path_a = save_transactions(df, tmp_path / "a.parquet")
+    art_dir = tmp_path / "artifacts"
+    meta = train_models(data_path=path_a, artifacts_dir=art_dir, seed=21)
+
+    th_before = run_threshold_selection(path_a, art_dir, COSTS_PATH)["alert_threshold"]
+
+    test_min = pd.Timestamp(meta["splits"]["test_min_ts"])
+    flipped = df.copy()
+    in_test = pd.to_datetime(flipped["ts"], utc=True) >= test_min
+    assert in_test.any()
+    flipped.loc[in_test, "is_fraud"] = 1 - flipped.loc[in_test, "is_fraud"]
+    path_b = save_transactions(flipped, tmp_path / "b.parquet")
+
+    th_after = run_threshold_selection(path_b, art_dir, COSTS_PATH)["alert_threshold"]
+    assert th_before == th_after

@@ -45,10 +45,18 @@ def extract_top_evidence(
     feature_columns: list[str] = FEATURE_COLUMNS,
     top_k: int = 5,
 ) -> list[EvidenceItem]:
-    """Extracts top-k feature contributions using XGBoost native TreeSHAP (pred_contribs=True)."""
+    """Extracts top-k feature contributions using XGBoost native TreeSHAP (pred_contribs=True).
+
+    Uses the same trees as predict_proba (up to best_iteration when early stopping was used),
+    so the contributions explain the score the model actually returned.
+    """
     row_df = pd.DataFrame([features])[feature_columns]
     dmat = xgb.DMatrix(row_df, feature_names=feature_columns)
-    contribs = model.get_booster().predict(dmat, pred_contribs=True)[0]
+    best = getattr(model, "best_iteration", None)
+    iteration_range = (0, int(best) + 1) if best is not None else (0, 0)
+    contribs = model.get_booster().predict(
+        dmat, pred_contribs=True, iteration_range=iteration_range
+    )[0]
     # Last element of pred_contribs is the bias term
     feat_contribs = contribs[: len(feature_columns)]
 

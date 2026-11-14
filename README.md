@@ -80,8 +80,9 @@ Using `config/costs.yaml` (`chargeback_loss_rate = 1.0`, `analyst_review_cost_in
 | Flag Everything (`0.0`) | 14,309,850.00 | 0.0059 | 1.0000 | 1.0000 | 1,596.49 |
 
 ### Weakest Fraud Patterns & Channel Breakdown
-- **Most missed fraud patterns:** `card_testing_burst` (initial low-rupee probe transactions occur before velocity counters build up, so the model catches the large cash-out while missing early probes) and `foreign_usage` (overlaps with legitimate international traveler cards when transaction amounts are moderate, requiring a high `0.965` cut-off to stay within the `12 alerts/day` team budget).
-- **Per-channel PR-AUC:** `ATM` and `POS` have slightly lower separability than `ECOM` because `device_id` is null on physical terminals, leaving fewer behavioral signals per event. Full breakdown tables are in `reports/threshold.md`.
+- **Most missed fraud patterns (test window, chosen threshold):** `atm_cashout_burst` (recall 0.8611, 31/36) and `foreign_usage` (recall 0.9778, 44/45). `card_testing_burst` and `new_device_high_ecom` are both caught at 1.0000. ATM burst amounts (INR 10k-20k) overlap genuine ATM withdrawals (INR 500-10k) at INR 10k, and ATM has a single MCC and no device_id, so only amount and velocity separate the classes. See `reports/threshold.md` for the data-derived hypotheses.
+- **Per-channel PR-AUC:** `ATM` is lowest (0.9211, 36 fraud cases), then `ECOM` (0.9955) and `POS` (1.0000). Per-channel fraud counts are small (27-125), so these numbers are noisy.
+- **Precision equals recall (0.9681)** at the chosen threshold because total alerts (188) equals total frauds (188), so FP = FN = 6.
 
 ---
 

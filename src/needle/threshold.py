@@ -166,12 +166,38 @@ def _eval_policy(
     }
 
 
-def generate_threshold_report(
-    data_path: str | Path = "data/transactions.parquet",
-    artifacts_dir: str | Path = "artifacts",
-    costs_path: str | Path = "config/costs.yaml",
-    reports_dir: str | Path = "reports",
-) -> dict:
+def _pattern_hypothesis(
+    pattern: str,
+    test_df: pd.DataFrame,
+    x_test: pd.DataFrame,
+    preds: np.ndarray,
+) -> str:
+    """Data-driven description of the fraud rows of `pattern` that the chosen threshold missed."""
+    idx = test_df.index[(test_df["is_fraud"] == 1) & (test_df["fraud_pattern"] == pattern)].to_numpy()
+    missed = idx[preds[idx] == 0]
+    if len(missed) == 0:
+        return f"No missed cases among {len(idx)} test fraud rows at the chosen threshold."
+    feats = x_test.loc[missed]
+    med_amt = float(test_df.loc[missed, "amount"].median())
+    return (
+        f"{len(missed)} of {len(idx)} missed; missed rows have median txn_count_1h="
+        f"{feats['txn_count_1h'].median():.0f}, median amount INR {med_amt:,.0f}, median "
+        f"amt_to_median_ratio={feats['amt_to_median_ratio'].median():.2f} "
+        f"(low velocity or amounts that overlap genuine behaviour, e.g. early burst steps)."
+    )
+
+
+def _channel_hypothesis(channel: str, n_txn: int, n_fraud: int) -> str:
+    base = f"Only {n_fraud} fraud cases in {n_txn} {channel} transactions, so PR-AUC is a high-variance estimate."
+    if channel == "ATM":
+        return (
+            base
+            + " ATM has a single MCC (6011) and no device_id, so only amount and velocity separate fraud;"
+            " burst amounts (10k-20k) overlap genuine 10k withdrawals."
+        )
+    return base
+
+def generate_threshold_report(data_path: str | Path = "data/transactions.parquet",artifacts_dir: str | Path = "artifacts",costs_path: str | Path = "config/costs.yaml",reports_dir: str | Path = "reports") -> dict:
     df = pd.read_parquet(data_path)
     splits = prepare_temporal_splits(df)
     costs = CostConfig.from_yaml(costs_path)
@@ -229,20 +255,21 @@ def generate_threshold_report(
         )
     channel_breakdown.sort(key=lambda x: x["pr_auc"])
 
-    weakest_areas = [
+    weakest_areas: list[dict] = []
+    for row in pattern_breakdown[:2]:
+        weakest_areas.append(
+            {
+                "area": f"Pattern: {row['fraud_pattern']} (Recall={row['recall']})",
+                "hypothesis": _pattern_hypothesis(row["fraud_pattern"], splits.test_df, splits.X_test, chosen_preds),
+            }
+        )
+    worst_ch = channel_breakdown[0]
+    weakest_areas.append(
         {
-            "area": f"Pattern: {pattern_breakdown[0]['fraud_pattern']} (Recall={pattern_breakdown[0]['recall']})",
-            "hypothesis": "Initial small probe transactions within a burst have low amounts before velocity counters build up.",
-        },
-        {
-            "area": f"Pattern: {pattern_breakdown[1]['fraud_pattern']} (Recall={pattern_breakdown[1]['recall']})",
-            "hypothesis": "Overlaps with genuine high-value shoppers or travelers, requiring a higher threshold to respect daily review capacity.",
-        },
-        {
-            "area": f"Channel: {channel_breakdown[0]['channel']} (PR-AUC={channel_breakdown[0]['pr_auc']})",
-            "hypothesis": "Fewer behavioral signals (e.g. null device_id on POS/ATM) reduce separability compared to ECOM.",
-        },
-    ]
+            "area": f"Channel: {worst_ch['channel']} (PR-AUC={worst_ch['pr_auc']})",
+            "hypothesis": _channel_hypothesis(worst_ch["channel"], worst_ch["transactions"], worst_ch["fraud_cases"]),
+        }
+    )
 
     report_data = {
         "chosen_threshold": chosen_th,
