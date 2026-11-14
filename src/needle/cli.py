@@ -6,6 +6,7 @@ import typer
 
 from needle.generator import generate_transactions, save_transactions
 from needle.model import evaluate_models, train_models
+from needle.threshold import generate_threshold_report, run_threshold_selection
 
 app = typer.Typer(help="Project Needle Card Fraud Scoring CLI")
 
@@ -51,6 +52,37 @@ def evaluate(
 ) -> None:
     report = evaluate_models(data_path=data, artifacts_dir=artifacts, reports_dir=reports)
     typer.echo(json.dumps(report, indent=2))
+
+
+@app.command()
+def threshold(
+    data: Path = typer.Option(Path("data/transactions.parquet"), "--data", help="Input parquet path"),
+    artifacts: Path = typer.Option(Path("artifacts"), "--artifacts", help="Artifacts directory"),
+    costs: Path = typer.Option(Path("config/costs.yaml"), "--costs", help="Costs YAML path"),
+) -> None:
+    meta = run_threshold_selection(data_path=data, artifacts_dir=artifacts, costs_path=costs)
+    typer.echo(
+        json.dumps(
+            {
+                "alert_threshold": meta["alert_threshold"],
+                "validation_expected_cost_inr": meta["validation_expected_cost_inr"],
+            },
+            indent=2,
+        )
+    )
+
+
+@app.command()
+def report(
+    data: Path = typer.Option(Path("data/transactions.parquet"), "--data", help="Input parquet path"),
+    artifacts: Path = typer.Option(Path("artifacts"), "--artifacts", help="Artifacts directory"),
+    costs: Path = typer.Option(Path("config/costs.yaml"), "--costs", help="Costs YAML path"),
+    reports: Path = typer.Option(Path("reports"), "--reports", help="Reports directory"),
+) -> None:
+    res = generate_threshold_report(
+        data_path=data, artifacts_dir=artifacts, costs_path=costs, reports_dir=reports
+    )
+    typer.echo(json.dumps(res["policy_comparison"], indent=2))
 
 
 if __name__ == "__main__":

@@ -1,0 +1,4 @@
+chargeback_loss_rate: 1.0
+analyst_review_cost_inr: 150.0
+customer_friction_cost_inr: 300.0
+max_alerts_per_day: 12.0

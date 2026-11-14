@@ -31,6 +31,12 @@
     "val_rows": 32021,
     "test_rows": 31925
   },
-  "alert_threshold": 0.5,
-  "validation_expected_cost_inr": null
+  "alert_threshold": 0.965,
+  "validation_expected_cost_inr": 233302.23,
+  "cost_config": {
+    "chargeback_loss_rate": 1.0,
+    "analyst_review_cost_inr": 150.0,
+    "customer_friction_cost_inr": 300.0,
+    "max_alerts_per_day": 12.0
+  }
 }
