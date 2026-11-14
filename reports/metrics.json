@@ -1,0 +1,17 @@
+{
+  "test_window": {
+    "total_transactions": 31925,
+    "fraud_cases": 188,
+    "fraud_rate": 0.005889
+  },
+  "xgboost": {
+    "pr_auc": 0.98145,
+    "roc_auc": 0.999548,
+    "recall_at_1pct_fpr": 0.984043
+  },
+  "logistic_regression_baseline": {
+    "pr_auc": 0.62539,
+    "roc_auc": 0.991894,
+    "recall_at_1pct_fpr": 0.776596
+  }
+}

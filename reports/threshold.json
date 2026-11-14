@@ -1,0 +1,116 @@
+{
+  "chosen_threshold": 0.965,
+  "validation_expected_cost_inr": 233302.23,
+  "max_alerts_per_day": 12.0,
+  "test_window_days": 20.0,
+  "policy_comparison": [
+    {
+      "policy": "chosen (0.965)",
+      "expected_cost_inr": 104265.69,
+      "precision": 0.9681,
+      "recall": 0.9681,
+      "amount_weighted_recall": 0.9856,
+      "avg_alerts_per_day": 9.4,
+      "total_alerts": 188,
+      "tp": 182,
+      "fp": 6,
+      "fn": 6
+    },
+    {
+      "policy": "default (0.5)",
+      "expected_cost_inr": 224250.0,
+      "precision": 0.3333,
+      "recall": 0.984,
+      "amount_weighted_recall": 0.9942,
+      "avg_alerts_per_day": 27.75,
+      "total_alerts": 555,
+      "tp": 185,
+      "fp": 370,
+      "fn": 3
+    },
+    {
+      "policy": "flag_nothing (1.01)",
+      "expected_cost_inr": 5161204.37,
+      "precision": 0.0,
+      "recall": 0.0,
+      "amount_weighted_recall": 0.0,
+      "avg_alerts_per_day": 0.0,
+      "total_alerts": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 188
+    },
+    {
+      "policy": "flag_everything (0.0)",
+      "expected_cost_inr": 14309850.0,
+      "precision": 0.0059,
+      "recall": 1.0,
+      "amount_weighted_recall": 1.0,
+      "avg_alerts_per_day": 1596.49,
+      "total_alerts": 31925,
+      "tp": 188,
+      "fp": 31737,
+      "fn": 0
+    }
+  ],
+  "per_pattern_recall": [
+    {
+      "fraud_pattern": "atm_cashout_burst",
+      "total_cases": 36,
+      "caught": 31,
+      "recall": 0.8611
+    },
+    {
+      "fraud_pattern": "foreign_usage",
+      "total_cases": 45,
+      "caught": 44,
+      "recall": 0.9778
+    },
+    {
+      "fraud_pattern": "card_testing_burst",
+      "total_cases": 72,
+      "caught": 72,
+      "recall": 1.0
+    },
+    {
+      "fraud_pattern": "new_device_high_ecom",
+      "total_cases": 35,
+      "caught": 35,
+      "recall": 1.0
+    }
+  ],
+  "per_channel_pr_auc": [
+    {
+      "channel": "ATM",
+      "transactions": 3797,
+      "fraud_cases": 36,
+      "pr_auc": 0.9211
+    },
+    {
+      "channel": "ECOM",
+      "transactions": 12880,
+      "fraud_cases": 125,
+      "pr_auc": 0.9955
+    },
+    {
+      "channel": "POS",
+      "transactions": 15248,
+      "fraud_cases": 27,
+      "pr_auc": 1.0
+    }
+  ],
+  "weakest_areas": [
+    {
+      "area": "Pattern: atm_cashout_burst (Recall=0.8611)",
+      "hypothesis": "Initial small probe transactions within a burst have low amounts before velocity counters build up."
+    },
+    {
+      "area": "Pattern: foreign_usage (Recall=0.9778)",
+      "hypothesis": "Overlaps with genuine high-value shoppers or travelers, requiring a higher threshold to respect daily review capacity."
+    },
+    {
+      "area": "Channel: ATM (PR-AUC=0.9211)",
+      "hypothesis": "Fewer behavioral signals (e.g. null device_id on POS/ATM) reduce separability compared to ECOM."
+    }
+  ]
+}
