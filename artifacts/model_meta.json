@@ -1,0 +1,36 @@
+{
+  "model_version": "xgb-needle-v1-seed42",
+  "seed": 42,
+  "trained_at_utc": "2026-11-14T06:48:56.829114+00:00",
+  "feature_columns": [
+    "amount",
+    "mcc",
+    "hour_of_day",
+    "channel_POS",
+    "channel_ECOM",
+    "channel_ATM",
+    "txn_count_1h",
+    "txn_sum_1h",
+    "txn_count_24h",
+    "txn_sum_24h",
+    "amt_to_median_ratio",
+    "secs_since_last_txn",
+    "is_new_country",
+    "is_new_device"
+  ],
+  "scale_pos_weight": 160.8333,
+  "best_iteration": 90,
+  "splits": {
+    "train_min_ts": "2026-01-01T00:00:16+00:00",
+    "train_max_ts": "2026-03-01T23:57:23+00:00",
+    "val_min_ts": "2026-03-01T23:58:22+00:00",
+    "val_max_ts": "2026-03-21T23:56:35+00:00",
+    "test_min_ts": "2026-03-22T00:00:07+00:00",
+    "test_max_ts": "2026-04-10T23:55:42+00:00",
+    "train_rows": 96129,
+    "val_rows": 32021,
+    "test_rows": 31925
+  },
+  "alert_threshold": 0.5,
+  "validation_expected_cost_inr": null
+}
