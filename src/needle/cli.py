@@ -4,6 +4,7 @@ from pathlib import Path
 import json
 import typer
 
+from needle.explain import run_explain_eval
 from needle.generator import generate_transactions, save_transactions
 from needle.model import evaluate_models, train_models
 from needle.threshold import generate_threshold_report, run_threshold_selection
@@ -83,6 +84,24 @@ def report(
         data_path=data, artifacts_dir=artifacts, costs_path=costs, reports_dir=reports
     )
     typer.echo(json.dumps(res["policy_comparison"], indent=2))
+
+
+@app.command("explain-eval")
+def explain_eval(
+    data: Path = typer.Option(Path("data/transactions.parquet"), "--data", help="Input parquet path"),
+    artifacts: Path = typer.Option(Path("artifacts"), "--artifacts", help="Artifacts directory"),
+    unfaithful: Path = typer.Option(
+        Path("data/eval/unfaithful_explanations.jsonl"), "--unfaithful", help="Unfaithful eval JSONL"
+    ),
+    reports: Path = typer.Option(Path("reports"), "--reports", help="Reports directory"),
+) -> None:
+    res = run_explain_eval(
+        data_path=data,
+        artifacts_dir=artifacts,
+        unfaithful_path=unfaithful,
+        reports_dir=reports,
+    )
+    typer.echo(json.dumps({k: v for k, v in res.items() if k != "unfaithful_audit"}, indent=2))
 
 
 if __name__ == "__main__":

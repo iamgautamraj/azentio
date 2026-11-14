@@ -1,0 +1,75 @@
+{
+  "provider": "fake",
+  "alerts_evaluated": 40,
+  "first_attempt_pass_rate": 0.825,
+  "pass_rate_after_retry": 0.825,
+  "template_fallback_rate": 0.175,
+  "unfaithful_cases_total": 8,
+  "unfaithful_cases_detected": 7,
+  "unfaithful_detection_rate": 0.875,
+  "unfaithful_audit": [
+    {
+      "id": "bad_1_unknown_feature",
+      "rule": "feature_not_in_evidence",
+      "rejected": true,
+      "reasons": [
+        "Claimed feature 'ip_reputation_score' is not in top-5 model evidence."
+      ]
+    },
+    {
+      "id": "bad_2_wrong_direction",
+      "rule": "direction_mismatch",
+      "rejected": true,
+      "reasons": [
+        "Direction mismatch for 'is_new_device': claimed 'lowers_risk', model 'raises_risk'."
+      ]
+    },
+    {
+      "id": "bad_3_hallucinated_narrative_number",
+      "rule": "number_mismatch_narrative",
+      "rejected": true,
+      "reasons": [
+        "Unverified number '9' in narrative not grounded in evidence or transaction fields.",
+        "Unverified number '1' in narrative not grounded in evidence or transaction fields."
+      ]
+    },
+    {
+      "id": "bad_4_hallucinated_claim_value",
+      "rule": "number_mismatch_claim",
+      "rejected": true,
+      "reasons": [
+        "Value mismatch for 'amt_to_median_ratio': claimed 99.9, evidence has 14.5."
+      ]
+    },
+    {
+      "id": "bad_5_confirmed_fraud_assertion",
+      "rule": "banned_phrase_confirmed_fraud",
+      "rejected": true,
+      "reasons": [
+        "Narrative contains disallowed accusation/certainty phrase: 'confirmed fraud'."
+      ]
+    },
+    {
+      "id": "bad_6_customer_blame",
+      "rule": "banned_phrase_customer_blame",
+      "rejected": true,
+      "reasons": [
+        "Narrative contains disallowed accusation/certainty phrase: 'scammer'."
+      ]
+    },
+    {
+      "id": "bad_7_over_word_limit",
+      "rule": "word_limit_exceeded",
+      "rejected": false,
+      "reasons": []
+    },
+    {
+      "id": "bad_8_stolen_card_claim",
+      "rule": "banned_phrase_stolen_card",
+      "rejected": true,
+      "reasons": [
+        "Narrative contains disallowed accusation/certainty phrase: 'stolen card'."
+      ]
+    }
+  ]
+}
