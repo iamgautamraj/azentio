@@ -26,3 +26,12 @@
 3. **Editable Install Packaging Artifact (`*.egg-info`) in Git Tree:**
    - *How I caught it:* After running `pip install -e ".[dev]"`, `src/needle/project_needle.egg-info/` appeared in the file explorer.
    - *Fix:* Appended `*.egg-info/` to `.gitignore` immediately so packaging build artifacts were never committed.
+4. **README Contradicted the Generated Threshold Report & Hypotheses Were Hard-Coded:**
+   - *How I caught it:* While reviewing the README against `reports/threshold.md`, the README said `card_testing_burst` was the most-missed fraud pattern, but the report showed it at recall `1.0000`. The weakest pattern was actually `atm_cashout_burst` (`0.8611`), then `foreign_usage` (`0.9778`). The README also claimed POS had lower separability than ECOM, but POS PR-AUC was `1.0000`. The cause was that the "weakest areas" hypotheses in `threshold.py` were hard-coded strings, so they never reflected the results.
+   - *Fix:* Replaced the hard-coded text with hypotheses computed from the missed rows (median `txn_count_1h`, amount and `amt_to_median_ratio`), regenerated `reports/threshold.md`, and corrected the README to match.
+5. **Label-Invariance Test Did Not Change Any Labels:**
+   - *How I caught it:* The test meant to prove that test-window labels don't affect the chosen threshold only called `select_validation_threshold` twice with identical inputs, so it could never fail.
+   - *Fix:* Added a test that flips `is_fraud` on all test-window rows, reruns `run_threshold_selection`, and asserts the threshold is unchanged.
+6. **SHAP Contributions Could Use Different Trees Than the Score:**
+   - *How I caught it:* The saved model has 116 trees but `best_iteration=90`. `predict_proba` stops at the best iteration, while `pred_contribs=True` could use all trees, so the evidence might not explain the returned score.
+   - *Fix:* Passed `iteration_range=(0, best_iteration + 1)` in `extract_top_evidence`.
