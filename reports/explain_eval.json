@@ -1,12 +1,12 @@
 {
   "provider": "fake",
   "alerts_evaluated": 40,
-  "first_attempt_pass_rate": 0.825,
-  "pass_rate_after_retry": 0.825,
-  "template_fallback_rate": 0.175,
+  "first_attempt_pass_rate": 1.0,
+  "pass_rate_after_retry": 1.0,
+  "template_fallback_rate": 0.0,
   "unfaithful_cases_total": 8,
-  "unfaithful_cases_detected": 7,
-  "unfaithful_detection_rate": 0.875,
+  "unfaithful_cases_detected": 8,
+  "unfaithful_detection_rate": 1.0,
   "unfaithful_audit": [
     {
       "id": "bad_1_unknown_feature",
@@ -60,8 +60,10 @@
     {
       "id": "bad_7_over_word_limit",
       "rule": "word_limit_exceeded",
-      "rejected": false,
-      "reasons": []
+      "rejected": true,
+      "reasons": [
+        "Narrative exceeds 80 words (83 words)."
+      ]
     },
     {
       "id": "bad_8_stolen_card_claim",
